@@ -2,10 +2,6 @@ from functools import partial
 
 import spconv
 import torch.nn as nn
-from .pfe.attention import VectorAttnModule
-from ...utils import common_utils
-from .pfe.attn_utils import find_knn
-from ...ops.pointnet2.pointnet2_stack import pointnet2_utils
 
 
 def post_act_block(in_channels, out_channels, kernel_size, indice_key=None, stride=1, padding=0,
@@ -73,10 +69,7 @@ class VoxelBackBone8x(nn.Module):
     def __init__(self, model_cfg, input_channels, grid_size, **kwargs):
         super().__init__()
         self.model_cfg = model_cfg
-        if model_cfg.NORM_TYPE == 'layer':
-            norm_fn = partial(nn.LayerNorm, eps=1e-3)
-        else:
-            norm_fn = partial(nn.BatchNorm1d, eps=1e-3, momentum=0.01)
+        norm_fn = partial(nn.BatchNorm1d, eps=1e-3, momentum=0.01)
 
         self.sparse_shape = grid_size[::-1] + [1, 0, 0]
 
