@@ -1,8 +1,11 @@
 from functools import partial
 
+import spconv
 import torch.nn as nn
-
-from ...utils.spconv_utils import replace_feature, spconv
+from .pfe.attention import VectorAttnModule
+from ...utils import common_utils
+from .pfe.attn_utils import find_knn
+from ...ops.pointnet2.pointnet2_stack import pointnet2_utils
 
 
 def post_act_block(in_channels, out_channels, kernel_size, indice_key=None, stride=1, padding=0,
@@ -51,17 +54,17 @@ class SparseBasicBlock(spconv.SparseModule):
         identity = x
 
         out = self.conv1(x)
-        out = replace_feature(out, self.bn1(out.features))
-        out = replace_feature(out, self.relu(out.features))
+        out.features = self.bn1(out.features)
+        out.features = self.relu(out.features)
 
         out = self.conv2(out)
-        out = replace_feature(out, self.bn2(out.features))
+        out.features = self.bn2(out.features)
 
         if self.downsample is not None:
             identity = self.downsample(x)
 
-        out = replace_feature(out, out.features + identity.features)
-        out = replace_feature(out, self.relu(out.features))
+        out.features += identity.features
+        out.features = self.relu(out.features)
 
         return out
 
@@ -70,7 +73,10 @@ class VoxelBackBone8x(nn.Module):
     def __init__(self, model_cfg, input_channels, grid_size, **kwargs):
         super().__init__()
         self.model_cfg = model_cfg
-        norm_fn = partial(nn.BatchNorm1d, eps=1e-3, momentum=0.01)
+        if model_cfg.NORM_TYPE == 'layer':
+            norm_fn = partial(nn.LayerNorm, eps=1e-3)
+        else:
+            norm_fn = partial(nn.BatchNorm1d, eps=1e-3, momentum=0.01)
 
         self.sparse_shape = grid_size[::-1] + [1, 0, 0]
 
@@ -280,7 +286,6 @@ class VoxelResBackBone8x(nn.Module):
                 'x_conv4': x_conv4,
             }
         })
-
         batch_dict.update({
             'multi_scale_3d_strides': {
                 'x_conv1': 1,
@@ -289,5 +294,5 @@ class VoxelResBackBone8x(nn.Module):
                 'x_conv4': 8,
             }
         })
-        
+
         return batch_dict
