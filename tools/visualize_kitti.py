@@ -43,8 +43,8 @@ def main(cfg_file, ckpt_file, log_file_dir='', split='testing'):
     model.zero_grad()
     model.eval()
 
-    img_dir = f'/home/user/Desktop/libs/OpenPCDet/data/kitti/{split}/image_2'
-    calib_dir = f'/home/user/Desktop/libs/OpenPCDet/data/kitti/{split}/calib'
+    img_dir = f'../data/kitti/{split}/image_2'
+    calib_dir = f'../data/kitti/{split}/calib'
 
     class_colors_float = np.array([
         [1, 0, 0],  # Car
