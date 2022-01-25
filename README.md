@@ -21,6 +21,12 @@ Performance on NuScenes *val* set
 To use this repo, please follow `OpenPCDet`'s intruction for [preparing datasets](https://github.com/open-mmlab/OpenPCDet/blob/master/docs/GETTING_STARTED.md) and [installation](https://github.com/open-mmlab/OpenPCDet/blob/master/docs/INSTALL.md).
 
 ## Demo
+Demo requires `open3d`
+
+```bash
+pip install open3d
+```
+
 ### KITTI Dataset
 To visualize prediction for KITTI Dataset, 
 * Download the [trained model](https://uncloud.univ-nantes.fr/index.php/s/iEgNps8RRXD6YSj)
